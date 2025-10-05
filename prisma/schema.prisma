@@ -1,0 +1,125 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==========================
+// ENUMS
+// ==========================
+
+enum UserStatus {
+  INACTIVE
+  ACTIVE
+}
+
+enum UserType {
+  SUPER_ADMIN
+  ADMIN
+  GENERAL
+}
+
+enum ClientType {
+  STANDARD
+  PREMIUM
+  ENTERPRISE
+}
+
+// ==========================
+// TABLE 1: CompanyUser
+// ==========================
+
+model CompanyUser {
+  id              Int        @id @default(autoincrement())
+  name            String     @db.VarChar(60)
+  username        String     @unique
+  password        String
+  email           String?    @unique
+  mobile          String?    @db.VarChar(10)
+  status          UserStatus @default(ACTIVE)
+  userType        UserType   @default(GENERAL)
+  lastModified    DateTime?  @updatedAt
+
+  // Relations
+  createdClients   ClientCompany[] @relation("CreatedClients")
+  modifiedClients  ClientCompany[] @relation("ModifiedClients")
+  assignedProducts Product[]
+}
+
+// ==========================
+// TABLE 2: ClientCompany
+// ==========================
+
+model ClientCompany {
+  id                   Int          @id @default(autoincrement())
+  companyName          String
+  email                String       @unique
+  mobile               String       @unique @db.VarChar(10)
+  status               UserStatus   @default(ACTIVE)
+  validTill            DateTime?
+  clientType           ClientType?  @default(STANDARD)
+  createdById          Int?
+  createdAt            DateTime     @default(now())
+  modifiedById         Int?
+  modifiedAt           DateTime?    @updatedAt
+  numProductsAssigned  Int?         @default(0)
+  numProductsInUse     Int?         @default(0)
+  credits              Int?         @default(0)
+  whatsappEnabled      Boolean      @default(false)
+  broadcastEnabled     Boolean      @default(false)
+  alarmEnabled         Boolean      @default(false)
+
+  // Relations
+  createdBy   CompanyUser?  @relation("CreatedClients", fields: [createdById], references: [id])
+  modifiedBy  CompanyUser?  @relation("ModifiedClients", fields: [modifiedById], references: [id])
+  clientUsers ClientUser[]
+  products    Product[]
+}
+
+// ==========================
+// TABLE 3: ClientUser
+// ==========================
+
+model ClientUser {
+  id          Int         @id @default(autoincrement())
+  clientId    Int
+  name        String
+  email       String       @unique
+  mobile      String       @unique @db.VarChar(10)
+  password    String
+  status      UserStatus   @default(ACTIVE)
+  createdAt   DateTime     @default(now())
+  modifiedAt  DateTime?    @updatedAt
+  userType    UserType     @default(GENERAL)
+
+  // Relations
+  client      ClientCompany @relation(fields: [clientId], references: [id])
+}
+
+// ==========================
+// TABLE 4: Product
+// ==========================
+
+model Product {
+  id            Int          @id @default(autoincrement())
+  batchId       String?
+  productId     String?
+  assignedToId  Int?
+  assignedAt    DateTime?
+  assignedById  Int?
+  productType   String?
+  validTill     DateTime?
+  gps           String?
+  imei          String?
+  sim           String?
+  simNumber     String?
+  location      String?
+
+  // Relations
+  assignedTo    ClientCompany?  @relation(fields: [assignedToId], references: [id])
+  assignedBy    CompanyUser?    @relation(fields: [assignedById], references: [id])
+}
+
