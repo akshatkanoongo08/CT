@@ -22,10 +22,15 @@ enum UserType {
   GENERAL
 }
 
-enum ClientType {
+enum Role {
   STANDARD
   PREMIUM
   ENTERPRISE
+}
+
+enum ClientType {
+  COMPANY_USER
+  CLIENT_USER
 }
 
 // ==========================
@@ -40,7 +45,8 @@ model CompanyUser {
   email           String?    @unique
   mobile          String?    @db.VarChar(10)
   status          UserStatus @default(ACTIVE)
-  userType        UserType   @default(GENERAL)
+  role            ROLE   @default(GENERAL)
+  userType        UserType   @default(COMPANY_USER)
   lastModified    DateTime?  @updatedAt
 
   // Relations
@@ -93,7 +99,8 @@ model ClientUser {
   status      UserStatus   @default(ACTIVE)
   createdAt   DateTime     @default(now())
   modifiedAt  DateTime?    @updatedAt
-  userType    UserType     @default(GENERAL)
+  role        ROLE         @default(GENERAL)
+  userType    UserType   @default(CLIENT_USER)
 
   // Relations
   client      ClientCompany @relation(fields: [clientId], references: [id])

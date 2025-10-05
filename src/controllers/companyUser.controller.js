@@ -26,7 +26,7 @@ const generateUniqueUsername = async (email, prisma) => {
 
 // addAdminUser
 export const addAdminUser = async (req, res) => {
-  const { name, mobile, email, userType, username: providedUsername } = req.body;
+  const { name, mobile, email, role, username: providedUsername } = req.body;
 
   try {
     // Check if user already exists
@@ -55,7 +55,7 @@ export const addAdminUser = async (req, res) => {
         email,
         username,
         password: hashedPassword,
-        userType: userType || 'GENERAL',
+        role: role || 'GENERAL',
         status: 'ACTIVE',
       },
     });
@@ -94,7 +94,7 @@ export const loginAdminUser = async (req, res) => {
 
     // Generate JWT token
     const token = jwt.sign(
-      { id: user.id, userType: user.userType, email: user.email },
+      { id: user.id, role: user.role, email: user.email },
       process.env.JWT_SECRET,
       { expiresIn: '2h' }
     );
@@ -102,7 +102,7 @@ export const loginAdminUser = async (req, res) => {
     res.status(200).json({
       message: 'Login successful',
       token,
-      user: { userType: user.userType },
+      user: { role: user.role },
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -222,8 +222,8 @@ export const editAdminUser = async (req, res) => {
 export const viewAdminUser = async (req, res) => {
   try {
     const users = await prisma.companyUser.findMany({
-      where: { userType: { in: ['SUPER_ADMIN', 'ADMIN'] } },
-      select: { id: true, name: true, email: true, mobile: true, status: true, userType: true },
+      where: { role: { in: ['SUPER_ADMIN', 'ADMIN'] } },
+      select: { id: true, name: true, email: true, mobile: true, status: true, role: true },
     });
 
     res.status(200).json(users);
@@ -238,7 +238,7 @@ export const getAdminProfile = async (req, res) => {
     const userId = req.user.id; // From auth middleware
     const user = await prisma.companyUser.findUnique({
       where: { id: userId },
-      select: { id: true, name: true, email: true, mobile: true, userType: true },
+      select: { id: true, name: true, email: true, mobile: true, role: true },
     });
 
     if (!user) {
@@ -255,7 +255,7 @@ export const getAdminProfile = async (req, res) => {
 export const getAllClients = async (req, res) => {
   try {
     const clients = await prisma.clientUser.findMany({
-      where: { userType: 'GENERAL' },
+      where: { role: 'GENERAL' },
       select: { id: true, name: true, email: true, clientId: true },
       include: { client: { select: { companyName: true } } },
     });
