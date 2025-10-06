@@ -94,7 +94,12 @@ export const loginAdminUser = async (req, res) => {
 
     // Generate JWT token
     const token = jwt.sign(
-      { id: user.id, role: user.role, email: user.email },
+      { 
+        id: user.id, 
+        role: user.role, 
+        email: user.email,
+        userType: user.userType 
+      },
       process.env.JWT_SECRET,
       { expiresIn: '2h' }
     );
@@ -102,7 +107,13 @@ export const loginAdminUser = async (req, res) => {
     res.status(200).json({
       message: 'Login successful',
       token,
-      user: { role: user.role },
+      user: { 
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        userType: user.userType,
+      },
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

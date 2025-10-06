@@ -62,3 +62,91 @@ export const sendResetCodeEmail = async (to, verificationCode) => {
     });
   });
 };
+
+// Send email to Client Company Super Admin with temporary password
+export const sendClientSuperAdminSetupEmail = async (to, adminName, companyName, tempPassword) => {
+  const transporter = createTransporter();
+
+  const mailOptions = {
+    from: process.env.GMAIL_USER,
+    to,
+    subject: `Welcome to ${companyName} - Your Account Setup`,
+    text: `Hello ${adminName},
+
+Welcome to ${companyName}! Your company has been successfully onboarded to our platform.
+
+You have been designated as the Super Admin for your company. Here are your login credentials:
+
+Email: ${to}
+Temporary Password: ${tempPassword}
+
+IMPORTANT: Please login and change your password immediately for security reasons.
+
+As a Super Admin, you can:
+- Add and manage users for your company
+- View and manage company settings
+- Assign products and manage company resources
+
+If you have any questions or need assistance, please contact our support team.
+
+Best regards,
+The Team`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f4f4f4;">
+        <div style="background-color: #ffffff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+          <h2 style="color: #333; margin-bottom: 20px;">Welcome to ${companyName}!</h2>
+          
+          <p style="color: #666; line-height: 1.6;">Hello <strong>${adminName}</strong>,</p>
+          
+          <p style="color: #666; line-height: 1.6;">
+            Your company has been successfully onboarded to our platform. You have been designated as the 
+            <strong>Super Admin</strong> for your company.
+          </p>
+          
+          <div style="background-color: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0;">
+            <h3 style="color: #333; margin-top: 0;">Your Login Credentials:</h3>
+            <p style="margin: 10px 0;"><strong>Email:</strong> ${to}</p>
+            <p style="margin: 10px 0;"><strong>Temporary Password:</strong> <code style="background-color: #e9ecef; padding: 5px 10px; border-radius: 3px; font-size: 16px;">${tempPassword}</code></p>
+          </div>
+          
+          <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0;">
+            <p style="margin: 0; color: #856404;">
+              <strong>⚠ IMPORTANT:</strong> Please login and change your password immediately for security reasons.
+            </p>
+          </div>
+          
+          <h3 style="color: #333; margin-top: 30px;">As a Super Admin, you can:</h3>
+          <ul style="color: #666; line-height: 1.8;">
+            <li>Add and manage users for your company</li>
+            <li>View and manage company settings</li>
+            <li>Assign products and manage company resources</li>
+            <li>Monitor company activities and reports</li>
+          </ul>
+          
+          <p style="color: #666; line-height: 1.6; margin-top: 30px;">
+            If you have any questions or need assistance, please don't hesitate to contact our support team.
+          </p>
+          
+          <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #dee2e6;">
+            <p style="color: #999; font-size: 12px; margin: 0;">
+              Best regards,<br>
+              The Team
+            </p>
+          </div>
+        </div>
+      </div>
+    `,
+  };
+
+  return new Promise((resolve, reject) => {
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error('Error while sending client super admin setup email:', error);
+        reject(error);
+      } else {
+        console.log('Client super admin setup email sent successfully:', info.response);
+        resolve(info);
+      }
+    });
+  });
+};

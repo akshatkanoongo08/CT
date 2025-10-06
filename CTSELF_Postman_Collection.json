@@ -1,0 +1,365 @@
+{
+  "info": {
+    "name": "CTSELF - Client Company Onboarding",
+    "description": "API collection for testing client company onboarding system",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/health",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["health"]
+        }
+      }
+    },
+    {
+      "name": "2. Company User Login",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "    var jsonData = pm.response.json();",
+              "    pm.environment.set('company_token', jsonData.token);",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"your_company_email@example.com\",\n  \"password\": \"your_password\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/company-users/login",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "company-users", "login"]
+        }
+      }
+    },
+    {
+      "name": "3. Onboard Client Company",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 201) {",
+              "    var jsonData = pm.response.json();",
+              "    pm.environment.set('client_company_id', jsonData.company.id);",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{company_token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"companyName\": \"Test Company Ltd\",\n  \"companyEmail\": \"contact@testcompany.com\",\n  \"companyMobile\": \"9876543210\",\n  \"clientType\": \"PREMIUM\",\n  \"validTill\": \"2025-12-31\",\n  \"credits\": 1000,\n  \"whatsappEnabled\": true,\n  \"broadcastEnabled\": true,\n  \"alarmEnabled\": false,\n  \"adminName\": \"Jane Smith\",\n  \"adminEmail\": \"jane@testcompany.com\",\n  \"adminMobile\": \"9876543211\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/onboard/client-company",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "onboard", "client-company"]
+        }
+      }
+    },
+    {
+      "name": "4. Get All Client Companies",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{company_token}}"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/api/onboard/client-companies",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "onboard", "client-companies"]
+        }
+      }
+    },
+    {
+      "name": "5. Get Single Client Company",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{company_token}}"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/api/onboard/client-company/{{client_company_id}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "onboard", "client-company", "{{client_company_id}}"]
+        }
+      }
+    },
+    {
+      "name": "6. Edit Client Company",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{company_token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"companyName\": \"Test Company Ltd Updated\",\n  \"credits\": 2000\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/onboard/client-company/{{client_company_id}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "onboard", "client-company", "{{client_company_id}}"]
+        }
+      }
+    },
+    {
+      "name": "7. Toggle Company Status",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{company_token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"INACTIVE\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/onboard/client-company/{{client_company_id}}/status",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "onboard", "client-company", "{{client_company_id}}", "status"]
+        }
+      }
+    },
+    {
+      "name": "8. Client User Login",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "    var jsonData = pm.response.json();",
+              "    pm.environment.set('client_token', jsonData.token);",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"jane@testcompany.com\",\n  \"password\": \"temp_password_from_email\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/client-users/login",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "client-users", "login"]
+        }
+      }
+    },
+    {
+      "name": "9. Add Client User",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{client_token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Bob Johnson\",\n  \"email\": \"bob@testcompany.com\",\n  \"mobile\": \"9876543212\",\n  \"role\": \"GENERAL\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/client-users",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "client-users"]
+        }
+      }
+    },
+    {
+      "name": "10. Get All Client Users",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{client_token}}"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/api/client-users",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "client-users"]
+        }
+      }
+    },
+    {
+      "name": "11. Update Client User",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{client_token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Bob Johnson Updated\",\n  \"role\": \"ADMIN\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/client-users/2",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "client-users", "2"]
+        }
+      }
+    },
+    {
+      "name": "12. Change Password",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{client_token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"currentPassword\": \"old_password\",\n  \"newPassword\": \"new_password123\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/client-users/change-password",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "client-users", "change-password"]
+        }
+      }
+    },
+    {
+      "name": "13. Delete Client User",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{client_token}}"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/api/client-users/2",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "client-users", "2"]
+        }
+      }
+    },
+    {
+      "name": "14. Delete Client Company (Super Admin Only)",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{company_token}}"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/api/onboard/client-company/{{client_company_id}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "onboard", "client-company", "{{client_company_id}}"]
+        }
+      }
+    }
+  ]
+}

@@ -16,6 +16,7 @@ export const authMiddleware = (allowedRoles = []) => async (req, res, next) => {
       id: decoded.id,
       email: decoded.email,
       userType: decoded.userType,
+      role: decoded.role,
     };
 
     // Verify user exists
@@ -24,8 +25,18 @@ export const authMiddleware = (allowedRoles = []) => async (req, res, next) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Check role permissions
-    if (allowedRoles.length && !allowedRoles.includes(user.userType)) {
+    // Check if userType is COMPANY_USER
+    if (user.userType !== 'COMPANY_USER') {
+      return res.status(403).json({ message: 'Access denied: user must be a COMPANY_USER' });
+    }
+
+    // Check if user is active
+    if (user.status !== 'ACTIVE') {
+      return res.status(403).json({ message: 'Access denied: account is inactive' });
+    }
+
+    // Check role permissions (if allowedRoles is provided)
+    if (allowedRoles.length && !allowedRoles.includes(user.role)) {
       return res.status(403).json({ message: 'Access denied: insufficient permissions' });
     }
 

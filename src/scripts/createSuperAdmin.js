@@ -1,35 +1,61 @@
-// scripts/createSuperAdmin.js
-
 import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
+import dotenv from 'dotenv';
+
+// Load environment variables
+dotenv.config();
 
 const prisma = new PrismaClient();
 
-async function main() {
+async function createSuperAdmin() {
   try {
-    // Hash the password
-    const hashedPassword = await bcrypt.hash('SuperAdmin@123', 10);
+    const email = 'superadmin@company.com';
+    const password = 'SuperAdmin@123';
+    const name = 'Super Admin';
+    const mobile = '9999999999';
+    const username = 'superadmin';
 
-    // Create Super Admin
+    // Check if super admin already exists
+    const existingUser = await prisma.companyUser.findUnique({
+      where: { email },
+    });
+
+    if (existingUser) {
+      console.log('❌ Super admin already exists with email:', email);
+      await prisma.$disconnect();
+      return;
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create super admin
     const superAdmin = await prisma.companyUser.create({
       data: {
-        name: 'Demo Super Admin',
-        username: 'superadmin',
+        name,
+        email,
+        mobile,
+        username,
         password: hashedPassword,
-        email: 'superadmin@example.com',
-        mobile: '9876543210',
+        role: 'SUPER_ADMIN',
         status: 'ACTIVE',
-        userType: 'SUPER_ADMIN',
+        userType: 'COMPANY_USER', // Important: set userType
       },
     });
 
-    console.log('✅ Super Admin created successfully:');
-    console.log(superAdmin);
-  } catch (error) {
-    console.error('❌ Error creating Super Admin:', error);
-  } finally {
+    console.log('✅ Super Admin created successfully!');
+    console.log('📧 Email:', email);
+    console.log('🔑 Password:', password);
+    console.log('👤 Username:', username);
+    console.log('🆔 ID:', superAdmin.id);
+    console.log('\n⚠️  Please change the password after first login!');
+
     await prisma.$disconnect();
+  } catch (error) {
+    console.error('❌ Error creating super admin:', error.message);
+    await prisma.$disconnect();
+    process.exit(1);
   }
 }
 
-main();
+createSuperAdmin();
