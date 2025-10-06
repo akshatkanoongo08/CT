@@ -16,19 +16,19 @@ enum UserStatus {
   ACTIVE
 }
 
-enum UserType {
+enum ROLE {
   SUPER_ADMIN
   ADMIN
   GENERAL
 }
 
-enum Role {
+enum ClientType {
   STANDARD
   PREMIUM
   ENTERPRISE
 }
 
-enum ClientType {
+enum UserType {
   COMPANY_USER
   CLIENT_USER
 }
