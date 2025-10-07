@@ -216,7 +216,7 @@ export const editAdminUser = async (req, res) => {
   try {
     // Find and update user
     const updatedUser = await prisma.companyUser.update({
-      where: { id: parseInt(id) },
+      where: { id: id },
       data: { name, email, mobile, status },
     });
 

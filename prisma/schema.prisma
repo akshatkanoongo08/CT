@@ -38,21 +38,21 @@ enum UserType {
 // ==========================
 
 model CompanyUser {
-  id              Int        @id @default(autoincrement())
+  id              String     @id @default(uuid())
   name            String     @db.VarChar(60)
   username        String     @unique
   password        String
   email           String?    @unique
   mobile          String?    @db.VarChar(10)
   status          UserStatus @default(ACTIVE)
-  role            ROLE   @default(GENERAL)
+  role            ROLE       @default(GENERAL)
   userType        UserType   @default(COMPANY_USER)
   lastModified    DateTime?  @updatedAt
 
   // Relations
   createdClients   ClientCompany[] @relation("CreatedClients")
   modifiedClients  ClientCompany[] @relation("ModifiedClients")
-  assignedProducts Product[]
+  assignedProducts CameraTrap[]
 }
 
 // ==========================
@@ -60,16 +60,16 @@ model CompanyUser {
 // ==========================
 
 model ClientCompany {
-  id                   Int          @id @default(autoincrement())
+  id                   String       @id @default(uuid())
   companyName          String
   email                String       @unique
   mobile               String       @unique @db.VarChar(10)
   status               UserStatus   @default(ACTIVE)
   validTill            DateTime?
   clientType           ClientType?  @default(STANDARD)
-  createdById          Int?
+  createdById          String?
   createdAt            DateTime     @default(now())
-  modifiedById         Int?
+  modifiedById         String?
   modifiedAt           DateTime?    @updatedAt
   numProductsAssigned  Int?         @default(0)
   numProductsInUse     Int?         @default(0)
@@ -82,7 +82,7 @@ model ClientCompany {
   createdBy   CompanyUser?  @relation("CreatedClients", fields: [createdById], references: [id])
   modifiedBy  CompanyUser?  @relation("ModifiedClients", fields: [modifiedById], references: [id])
   clientUsers ClientUser[]
-  products    Product[]
+  products    CameraTrap[]
 }
 
 // ==========================
@@ -90,8 +90,8 @@ model ClientCompany {
 // ==========================
 
 model ClientUser {
-  id          Int         @id @default(autoincrement())
-  clientId    Int
+  id          String       @id @default(uuid())
+  clientId    String
   name        String
   email       String       @unique
   mobile      String       @unique @db.VarChar(10)
@@ -100,7 +100,7 @@ model ClientUser {
   createdAt   DateTime     @default(now())
   modifiedAt  DateTime?    @updatedAt
   role        ROLE         @default(GENERAL)
-  userType    UserType   @default(CLIENT_USER)
+  userType    UserType     @default(CLIENT_USER)
 
   // Relations
   client      ClientCompany @relation(fields: [clientId], references: [id])
@@ -110,13 +110,13 @@ model ClientUser {
 // TABLE 4: Product
 // ==========================
 
-model Product {
-  id            Int          @id @default(autoincrement())
+model CameraTrap {
+  id            String        @id @default(uuid())
   batchId       String?
   productId     String?
-  assignedToId  Int?
+  assignedToId  String?
   assignedAt    DateTime?
-  assignedById  Int?
+  assignedById  String?
   productType   String?
   validTill     DateTime?
   gps           String?

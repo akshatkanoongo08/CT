@@ -211,7 +211,7 @@ export const updateClientUser = async (req, res) => {
   try {
     // Check if user exists and belongs to the same company
     const user = await prisma.clientUser.findUnique({
-      where: { id: parseInt(userId) },
+      where: { id: userId },
     });
 
     if (!user) {
@@ -229,7 +229,7 @@ export const updateClientUser = async (req, res) => {
 
     // Update user
     const updatedUser = await prisma.clientUser.update({
-      where: { id: parseInt(userId) },
+      where: { id: userId },
       data: {
         ...(name && { name }),
         ...(mobile && { mobile }),
@@ -270,7 +270,7 @@ export const deleteClientUser = async (req, res) => {
   try {
     // Check if user exists and belongs to the same company
     const user = await prisma.clientUser.findUnique({
-      where: { id: parseInt(userId) },
+      where: { id: userId },
     });
 
     if (!user) {
@@ -288,7 +288,7 @@ export const deleteClientUser = async (req, res) => {
 
     // Delete user
     await prisma.clientUser.delete({
-      where: { id: parseInt(userId) },
+      where: { id: userId },
     });
 
     res.status(200).json({

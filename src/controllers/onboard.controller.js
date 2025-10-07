@@ -185,7 +185,7 @@ export const editClientCompany = async (req, res) => {
   try {
     // Check if company exists
     const company = await prisma.clientCompany.findUnique({
-      where: { id: parseInt(companyId) },
+      where: { id: companyId },
     });
 
     if (!company) {
@@ -202,7 +202,7 @@ export const editClientCompany = async (req, res) => {
         where: { id: req.user.id },
       });
 
-      if (clientUser.clientId !== parseInt(companyId)) {
+      if (clientUser.clientId !== companyId) {
         return res.status(403).json({ message: 'Access denied: You can only edit your own company' });
       }
 
@@ -217,7 +217,7 @@ export const editClientCompany = async (req, res) => {
       const duplicate = await prisma.clientCompany.findFirst({
         where: {
           AND: [
-            { id: { not: parseInt(companyId) } },
+            { id: { not: companyId } },
             {
               OR: [
                 email ? { email } : {},
@@ -235,7 +235,7 @@ export const editClientCompany = async (req, res) => {
 
     // Update company
     const updatedCompany = await prisma.clientCompany.update({
-      where: { id: parseInt(companyId) },
+      where: { id: companyId },
       data: {
         ...(companyName && { companyName }),
         ...(email && { email }),
@@ -277,7 +277,7 @@ export const toggleClientCompanyStatus = async (req, res) => {
   try {
     // Check if company exists
     const company = await prisma.clientCompany.findUnique({
-      where: { id: parseInt(companyId) },
+      where: { id: companyId },
     });
 
     if (!company) {
@@ -294,7 +294,7 @@ export const toggleClientCompanyStatus = async (req, res) => {
         where: { id: req.user.id },
       });
 
-      if (clientUser.clientId !== parseInt(companyId)) {
+      if (clientUser.clientId !== companyId) {
         return res.status(403).json({ message: 'Access denied: You can only manage your own company' });
       }
 
@@ -306,7 +306,7 @@ export const toggleClientCompanyStatus = async (req, res) => {
 
     // Update status
     const updatedCompany = await prisma.clientCompany.update({
-      where: { id: parseInt(companyId) },
+      where: { id: companyId },
       data: {
         status,
         modifiedById: req.user.id,
@@ -346,7 +346,7 @@ export const deleteClientCompany = async (req, res) => {
 
     // Check if company exists
     const company = await prisma.clientCompany.findUnique({
-      where: { id: parseInt(companyId) },
+      where: { id: companyId },
       include: {
         clientUsers: true,
         products: true,
@@ -361,12 +361,12 @@ export const deleteClientCompany = async (req, res) => {
     await prisma.$transaction(async (tx) => {
       // Delete all client users
       await tx.clientUser.deleteMany({
-        where: { clientId: parseInt(companyId) },
+        where: { clientId: companyId },
       });
 
       // Unassign all products
       await tx.product.updateMany({
-        where: { assignedToId: parseInt(companyId) },
+        where: { assignedToId: companyId },
         data: {
           assignedToId: null,
           assignedAt: null,
@@ -375,7 +375,7 @@ export const deleteClientCompany = async (req, res) => {
 
       // Delete the company
       await tx.clientCompany.delete({
-        where: { id: parseInt(companyId) },
+        where: { id: companyId },
       });
     });
 
@@ -440,7 +440,7 @@ export const getClientCompany = async (req, res) => {
 
   try {
     const company = await prisma.clientCompany.findUnique({
-      where: { id: parseInt(companyId) },
+      where: { id: companyId },
       include: {
         createdBy: {
           select: {
