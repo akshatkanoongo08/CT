@@ -7,9 +7,78 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ==========================
-// ENUMS
-// ==========================
+model CompanyUser {
+  id               String          @id @default(uuid())
+  name             String          @db.VarChar(60)
+  username         String          @unique
+  password         String
+  email            String?         @unique
+  mobile           String?         @db.VarChar(10)
+  status           UserStatus      @default(ACTIVE)
+  userType         UserType        @default(COMPANY_USER)
+  lastModified     DateTime?       @updatedAt
+  role             ROLE            @default(GENERAL)
+  assignedProducts CameraTrap[]
+  createdClients   ClientCompany[] @relation("CreatedClients")
+  modifiedClients  ClientCompany[] @relation("ModifiedClients")
+}
+
+model ClientCompany {
+  id                  String       @id @default(uuid())
+  companyName         String
+  email               String       @unique
+  mobile              String       @unique @db.VarChar(10)
+  status              UserStatus   @default(ACTIVE)
+  validTill           DateTime?
+  clientType          ClientType?  @default(STANDARD)
+  createdById         String?
+  createdAt           DateTime     @default(now())
+  modifiedById        String?
+  modifiedAt          DateTime?    @updatedAt
+  numProductsAssigned Int?         @default(0)
+  numProductsInUse    Int?         @default(0)
+  credits             Int?         @default(0)
+  whatsappEnabled     Boolean      @default(false)
+  broadcastEnabled    Boolean      @default(false)
+  alarmEnabled        Boolean      @default(false)
+  products            CameraTrap[]
+  createdBy           CompanyUser? @relation("CreatedClients", fields: [createdById], references: [id])
+  modifiedBy          CompanyUser? @relation("ModifiedClients", fields: [modifiedById], references: [id])
+  clientUsers         ClientUser[]
+}
+
+model ClientUser {
+  id         String        @id @default(uuid())
+  clientId   String
+  name       String
+  email      String        @unique
+  mobile     String        @unique @db.VarChar(10)
+  password   String
+  status     UserStatus    @default(ACTIVE)
+  createdAt  DateTime      @default(now())
+  modifiedAt DateTime?     @updatedAt
+  userType   UserType      @default(CLIENT_USER)
+  role       ROLE          @default(GENERAL)
+  client     ClientCompany @relation(fields: [clientId], references: [id])
+}
+
+model CameraTrap {
+  id           String         @id @default(uuid())
+  batchId      String?
+  productId    String?
+  assignedToId String?
+  assignedAt   DateTime?
+  assignedById String?
+  productType  String?
+  validTill    DateTime?
+  gps          String?
+  imei         String?
+  sim          String?
+  simNumber    String?
+  location     String?
+  assignedBy   CompanyUser?   @relation(fields: [assignedById], references: [id])
+  assignedTo   ClientCompany? @relation(fields: [assignedToId], references: [id])
+}
 
 enum UserStatus {
   INACTIVE
@@ -32,101 +101,3 @@ enum UserType {
   COMPANY_USER
   CLIENT_USER
 }
-
-// ==========================
-// TABLE 1: CompanyUser
-// ==========================
-
-model CompanyUser {
-  id              String     @id @default(uuid())
-  name            String     @db.VarChar(60)
-  username        String     @unique
-  password        String
-  email           String?    @unique
-  mobile          String?    @db.VarChar(10)
-  status          UserStatus @default(ACTIVE)
-  role            ROLE       @default(GENERAL)
-  userType        UserType   @default(COMPANY_USER)
-  lastModified    DateTime?  @updatedAt
-
-  // Relations
-  createdClients   ClientCompany[] @relation("CreatedClients")
-  modifiedClients  ClientCompany[] @relation("ModifiedClients")
-  assignedProducts CameraTrap[]
-}
-
-// ==========================
-// TABLE 2: ClientCompany
-// ==========================
-
-model ClientCompany {
-  id                   String       @id @default(uuid())
-  companyName          String
-  email                String       @unique
-  mobile               String       @unique @db.VarChar(10)
-  status               UserStatus   @default(ACTIVE)
-  validTill            DateTime?
-  clientType           ClientType?  @default(STANDARD)
-  createdById          String?
-  createdAt            DateTime     @default(now())
-  modifiedById         String?
-  modifiedAt           DateTime?    @updatedAt
-  numProductsAssigned  Int?         @default(0)
-  numProductsInUse     Int?         @default(0)
-  credits              Int?         @default(0)
-  whatsappEnabled      Boolean      @default(false)
-  broadcastEnabled     Boolean      @default(false)
-  alarmEnabled         Boolean      @default(false)
-
-  // Relations
-  createdBy   CompanyUser?  @relation("CreatedClients", fields: [createdById], references: [id])
-  modifiedBy  CompanyUser?  @relation("ModifiedClients", fields: [modifiedById], references: [id])
-  clientUsers ClientUser[]
-  products    CameraTrap[]
-}
-
-// ==========================
-// TABLE 3: ClientUser
-// ==========================
-
-model ClientUser {
-  id          String       @id @default(uuid())
-  clientId    String
-  name        String
-  email       String       @unique
-  mobile      String       @unique @db.VarChar(10)
-  password    String
-  status      UserStatus   @default(ACTIVE)
-  createdAt   DateTime     @default(now())
-  modifiedAt  DateTime?    @updatedAt
-  role        ROLE         @default(GENERAL)
-  userType    UserType     @default(CLIENT_USER)
-
-  // Relations
-  client      ClientCompany @relation(fields: [clientId], references: [id])
-}
-
-// ==========================
-// TABLE 4: Product
-// ==========================
-
-model CameraTrap {
-  id            String        @id @default(uuid())
-  batchId       String?
-  productId     String?
-  assignedToId  String?
-  assignedAt    DateTime?
-  assignedById  String?
-  productType   String?
-  validTill     DateTime?
-  gps           String?
-  imei          String?
-  sim           String?
-  simNumber     String?
-  location      String?
-
-  // Relations
-  assignedTo    ClientCompany?  @relation(fields: [assignedToId], references: [id])
-  assignedBy    CompanyUser?    @relation(fields: [assignedById], references: [id])
-}
-

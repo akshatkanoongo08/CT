@@ -2,6 +2,7 @@ import express from 'express';
 import companyUserRoutes from './routes/companyUser.routes.js';
 import onboardRoutes from './routes/onboard.routes.js';
 import clientUserRoutes from './routes/clientUser.routes.js';
+import cameraTrapRoutes from './routes/ct.routes.js';
 import dotenv from 'dotenv';
 import cors from 'cors';
 
@@ -34,8 +35,19 @@ app.use('/api/onboard', onboardRoutes);
 console.log('Mounting client user routes at /api/client-users');
 app.use('/api/client-users', clientUserRoutes);
 
+console.log('Mounting camera trap routes at /api/camera-traps');
+app.use('/api/camera-traps', cameraTrapRoutes);
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`Test URL: http://localhost:${PORT}/health`);
+  console.log('\nRegistered routes:');
+  console.log('- POST /api/camera-traps (add)');
+  console.log('- GET /api/camera-traps (list)');
+  console.log('- GET /api/camera-traps/:trapId (single)');
+  console.log('- PUT /api/camera-traps/:trapId (edit)');
+  console.log('- DELETE /api/camera-traps/:trapId (delete)');
+  console.log('- POST /api/camera-traps/:trapId/assign');
+  console.log('- POST /api/camera-traps/:trapId/unassign');
 });
