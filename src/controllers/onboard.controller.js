@@ -246,7 +246,8 @@ export const editClientCompany = async (req, res) => {
         ...(whatsappEnabled !== undefined && { whatsappEnabled }),
         ...(broadcastEnabled !== undefined && { broadcastEnabled }),
         ...(alarmEnabled !== undefined && { alarmEnabled }),
-        modifiedById: req.user.id,
+        // Only set modifiedById if user is COMPANY_USER (foreign key constraint)
+        ...(userType === 'COMPANY_USER' && { modifiedById: req.user.id }),
       },
     });
 

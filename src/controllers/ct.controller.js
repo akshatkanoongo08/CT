@@ -262,6 +262,13 @@ export const editCameraTrap = async (req, res) => {
       if (assignedToId && assignedToId !== existingTrap.assignedToId) {
         return res.status(403).json({ message: 'Access denied: Client users cannot change assignment' });
       }
+
+      // Client users cannot change critical fields
+      if (productType !== undefined || location !== undefined || gps !== undefined || validTill !== undefined || productId !== undefined || batchId !== undefined) {
+        return res.status(403).json({ 
+          message: 'Access denied: Client users can only edit IMEI, SIM, and SIM Number fields' 
+        });
+      }
     }
 
     // If changing assignment, verify new company exists

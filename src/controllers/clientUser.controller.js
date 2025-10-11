@@ -84,6 +84,8 @@ export const loginClientUser = async (req, res) => {
         email: user.client.email,
         clientType: user.client.clientType,
         credits: user.client.credits,
+        status: user.client.status, // ← ADDED: Include status field
+        validTill: user.client.validTill, // ← ADDED: Include validTill for expiry alerts
       },
     });
   } catch (error) {
