@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
+import { sendClientUserSetupEmail } from '../utils/emailService.js';
 
 const prisma = new PrismaClient();
 
@@ -145,7 +146,20 @@ export const addClientUser = async (req, res) => {
       },
     });
 
-    // TODO: Send email with temporary password
+    // Send email with temporary password
+    try {
+      await sendClientUserSetupEmail(
+        email,
+        name,
+        req.company.companyName, // From validateClientCompany middleware
+        tempPassword,
+        role || 'GENERAL'
+      );
+      console.log(`Setup email sent to ${email}`);
+    } catch (emailError) {
+      console.error('Failed to send setup email:', emailError);
+      // Don't fail the user creation if email fails
+    }
 
     res.status(201).json({
       message: 'User created successfully',
@@ -156,7 +170,7 @@ export const addClientUser = async (req, res) => {
         mobile: newUser.mobile,
         role: newUser.role,
       },
-      tempPassword, // In production, don't return this - send via email only
+      tempPassword, // Also return in response for now
     });
   } catch (error) {
     console.error('Error in addClientUser:', error);
