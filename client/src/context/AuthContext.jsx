@@ -49,7 +49,7 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('company', JSON.stringify(company));
         
         console.log('Login successful, user:', user); // Debug log
-        return { success: true };
+        return { success: true, firstLogin: user.firstLogin }; // ← ADDED: Return firstLogin flag
       } else {
         throw new Error(response.message || 'Login failed');
       }

@@ -4,6 +4,7 @@ import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/Layout';
 import Login from './pages/Login';
+import ForcePasswordChange from './pages/ForcePasswordChange';
 import Dashboard from './pages/Dashboard';
 import CameraTraps from './pages/CameraTraps';
 import CameraTrapDetail from './pages/CameraTrapDetail';
@@ -17,6 +18,16 @@ function App() {
       <AuthProvider>
         <Routes>
           <Route path="/login" element={<Login />} />
+          
+          {/* Force Password Change Route - Must be authenticated but outside main layout */}
+          <Route
+            path="/force-password-change"
+            element={
+              <ProtectedRoute>
+                <ForcePasswordChange />
+              </ProtectedRoute>
+            }
+          />
           
           <Route
             path="/"

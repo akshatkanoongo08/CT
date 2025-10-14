@@ -78,6 +78,7 @@ export const loginClientUser = async (req, res) => {
         mobile: user.mobile,
         role: user.role,
         userType: user.userType,
+        firstLogin: user.firstLogin, // ← ADDED: Include firstLogin flag
       },
       company: {
         id: user.client.id,
@@ -351,7 +352,10 @@ export const changeClientUserPassword = async (req, res) => {
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     await prisma.clientUser.update({
       where: { id: req.user.id },
-      data: { password: hashedPassword },
+      data: { 
+        password: hashedPassword,
+        firstLogin: false, // ← ADDED: Set firstLogin to false after password change
+      },
     });
 
     res.status(200).json({

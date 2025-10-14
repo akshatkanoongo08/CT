@@ -4,7 +4,10 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URLmodel CompanyUser {
+  url      = env("DATABASE_URL")
+}
+
+model CompanyUser {
   id               String          @id @default(uuid())
   name             String          @db.VarChar(60)
   username         String          @unique
@@ -56,6 +59,7 @@ model ClientUser {
   modifiedAt DateTime?     @updatedAt
   userType   UserType      @default(CLIENT_USER)
   role       ROLE          @default(GENERAL)
+  firstLogin Boolean       @default(true)
   client     ClientCompany @relation(fields: [clientId], references: [id])
 }
 
@@ -98,7 +102,3 @@ enum UserType {
   COMPANY_USER
   CLIENT_USER
 }
-ields: [assignedToId], references: [id])
-  assignedBy    CompanyUser?    @relation(fields: [assignedById], references: [id])
-}
-

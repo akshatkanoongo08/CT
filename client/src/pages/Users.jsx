@@ -82,11 +82,7 @@ const Users = () => {
         const response = await api.addClientUser(formData);
         // Backend returns: { message, user, tempPassword }
         setSuccess(
-          `${response.message || 'User created successfully!'} ${
-            response.tempPassword
-              ? `Temporary password: ${response.tempPassword}`
-              : ''
-          }`
+          `${response.message || 'User created successfully!'}`
         );
         fetchUsers();
       }
