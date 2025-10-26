@@ -1,0 +1,471 @@
+{
+	"info": {
+		"_postman_id": "camera-trap-api-collection",
+		"name": "CTSELF - Camera Trap API",
+		"description": "Complete API collection for Camera Trap Management System\n\n## Authentication\nAll endpoints require a valid JWT token in the Authorization header.\n\n## User Types\n- **COMPANY_USER**: Internal company administrators (ADMIN, SUPER_ADMIN, GENERAL)\n- **CLIENT_USER**: Client company users (SUPER_ADMIN, ADMIN, GENERAL)\n\n## Base URL\n- Development: `http://localhost:3000`\n- Production: Update as needed",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Camera Traps",
+			"item": [
+				{
+					"name": "1. Add Camera Trap",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{company_token}}",
+								"description": "JWT token from company user login (ADMIN or SUPER_ADMIN only)"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"batchId\": \"BATCH-2025-001\",\n  \"productId\": \"CT-PRD-12345\",\n  \"productType\": \"Wildlife Camera Pro\",\n  \"validTill\": \"2026-12-31\",\n  \"gps\": \"28.6139,77.2090\",\n  \"imei\": \"123456789012345\",\n  \"sim\": \"Airtel\",\n  \"simNumber\": \"9876543210\",\n  \"location\": \"Delhi Wildlife Sanctuary\",\n  \"assignedToId\": \"<client-company-id>\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/camera-traps",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"camera-traps"
+							]
+						},
+						"description": "**Access:** Company ADMIN and SUPER_ADMIN only\n\n**Purpose:** Add a new camera trap to the system\n\n**Request Body:**\n- `productId` (required): Unique product identifier\n- `batchId` (optional): Batch identifier\n- `productType` (optional): Type/model of camera trap\n- `validTill` (optional): Validity date (ISO format)\n- `gps` (optional): GPS coordinates\n- `imei` (optional): IMEI number\n- `sim` (optional): SIM card provider\n- `simNumber` (optional): SIM card number\n- `location` (optional): Physical location\n- `assignedToId` (optional): Client company ID to assign to\n\n**Response:**\n- `201 Created`: Camera trap created successfully\n- `400 Bad Request`: Validation error\n- `401 Unauthorized`: Invalid or missing token\n- `403 Forbidden`: Insufficient permissions"
+					},
+					"response": []
+				},
+				{
+					"name": "2. Get All Camera Traps",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"description": "JWT token from any authenticated user"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/camera-traps",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"camera-traps"
+							]
+						},
+						"description": "**Access:** All authenticated users\n\n**Purpose:** Get list of camera traps\n\n**Behavior:**\n- **Company Users**: See all camera traps in the system\n- **Client Users**: See only camera traps assigned to their company\n\n**Response:**\n```json\n{\n  \"message\": \"Camera traps retrieved successfully\",\n  \"cameraTraps\": [\n    {\n      \"id\": \"uuid\",\n      \"batchId\": \"BATCH-2025-001\",\n      \"productId\": \"CT-PRD-12345\",\n      \"productType\": \"Wildlife Camera Pro\",\n      \"validTill\": \"2026-12-31T00:00:00.000Z\",\n      \"gps\": \"28.6139,77.2090\",\n      \"imei\": \"123456789012345\",\n      \"sim\": \"Airtel\",\n      \"simNumber\": \"9876543210\",\n      \"location\": \"Delhi Wildlife Sanctuary\",\n      \"assignedToId\": \"uuid\",\n      \"assignedAt\": \"2025-10-26T...\",\n      \"assignedById\": \"uuid\",\n      \"assignedTo\": {\n        \"id\": \"uuid\",\n        \"companyName\": \"Client Company Name\",\n        \"email\": \"client@company.com\"\n      },\n      \"assignedBy\": {\n        \"id\": \"uuid\",\n        \"name\": \"Admin Name\",\n        \"email\": \"admin@company.com\"\n      }\n    }\n  ],\n  \"count\": 1\n}\n```"
+					},
+					"response": []
+				},
+				{
+					"name": "3. Get Single Camera Trap",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"description": "JWT token from any authenticated user"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/camera-traps/:trapId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"camera-traps",
+								":trapId"
+							],
+							"variable": [
+								{
+									"key": "trapId",
+									"value": "{{camera_trap_id}}",
+									"description": "Camera trap UUID"
+								}
+							]
+						},
+						"description": "**Access:** All authenticated users\n\n**Purpose:** Get details of a specific camera trap\n\n**Behavior:**\n- **Company Users**: Can view any camera trap\n- **Client Users**: Can only view if assigned to their company\n\n**Response:**\n```json\n{\n  \"message\": \"Camera trap retrieved successfully\",\n  \"cameraTrap\": {\n    \"id\": \"uuid\",\n    \"batchId\": \"BATCH-2025-001\",\n    \"productId\": \"CT-PRD-12345\",\n    \"productType\": \"Wildlife Camera Pro\",\n    \"validTill\": \"2026-12-31T00:00:00.000Z\",\n    \"gps\": \"28.6139,77.2090\",\n    \"imei\": \"123456789012345\",\n    \"sim\": \"Airtel\",\n    \"simNumber\": \"9876543210\",\n    \"location\": \"Delhi Wildlife Sanctuary\",\n    \"assignedToId\": \"uuid\",\n    \"assignedAt\": \"2025-10-26T...\",\n    \"assignedById\": \"uuid\",\n    \"assignedTo\": {\n      \"id\": \"uuid\",\n      \"companyName\": \"Client Company Name\",\n      \"email\": \"client@company.com\"\n    },\n    \"assignedBy\": {\n      \"id\": \"uuid\",\n      \"name\": \"Admin Name\",\n      \"email\": \"admin@company.com\"\n    }\n  }\n}\n```"
+					},
+					"response": []
+				},
+				{
+					"name": "4. Edit Camera Trap (Company User)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{company_token}}",
+								"description": "JWT token from company user"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"batchId\": \"BATCH-2025-002\",\n  \"productId\": \"CT-PRD-12345-UPDATED\",\n  \"productType\": \"Wildlife Camera Pro Max\",\n  \"validTill\": \"2027-12-31\",\n  \"gps\": \"28.7041,77.1025\",\n  \"imei\": \"123456789012345\",\n  \"sim\": \"Jio\",\n  \"simNumber\": \"9876543210\",\n  \"location\": \"Mumbai Wildlife Sanctuary\",\n  \"assignedToId\": \"<new-client-company-id>\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/camera-traps/:trapId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"camera-traps",
+								":trapId"
+							],
+							"variable": [
+								{
+									"key": "trapId",
+									"value": "{{camera_trap_id}}",
+									"description": "Camera trap UUID"
+								}
+							]
+						},
+						"description": "**Access:** Company users (all roles)\n\n**Purpose:** Edit any field of a camera trap including assignment\n\n**Permissions:**\n- Company users can edit **all fields** including `productType`, `location`, `gps`, `validTill`, `productId`, `batchId`, and `assignedToId`\n\n**Request Body:** All fields are optional, send only what you want to update\n\n**Response:**\n- `200 OK`: Camera trap updated successfully\n- `400 Bad Request`: Validation error\n- `404 Not Found`: Camera trap not found"
+					},
+					"response": []
+				},
+				{
+					"name": "5. Edit Camera Trap (Client User - Limited)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{client_token}}",
+								"description": "JWT token from client user"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"imei\": \"987654321098765\",\n  \"sim\": \"Vodafone\",\n  \"simNumber\": \"9123456789\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/camera-traps/:trapId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"camera-traps",
+								":trapId"
+							],
+							"variable": [
+								{
+									"key": "trapId",
+									"value": "{{camera_trap_id}}",
+									"description": "Camera trap UUID"
+								}
+							]
+						},
+						"description": "**Access:** Client users (all roles)\n\n**Purpose:** Edit limited fields of camera traps assigned to their company\n\n**Permissions:**\n- Client users can **ONLY** edit:\n  - `imei`\n  - `sim`\n  - `simNumber`\n\n**Restrictions:**\n- Cannot edit: `productType`, `location`, `gps`, `validTill`, `productId`, `batchId`, `assignedToId`\n- Can only edit camera traps assigned to their company\n\n**Response:**\n- `200 OK`: Camera trap updated successfully\n- `403 Forbidden`: Attempting to edit restricted fields or unassigned camera trap\n- `404 Not Found`: Camera trap not found"
+					},
+					"response": []
+				},
+				{
+					"name": "6. Assign Camera Trap to Client",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{company_token}}",
+								"description": "JWT token from company user (ADMIN or SUPER_ADMIN)"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"clientCompanyId\": \"<client-company-uuid>\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/camera-traps/:trapId/assign",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"camera-traps",
+								":trapId",
+								"assign"
+							],
+							"variable": [
+								{
+									"key": "trapId",
+									"value": "{{camera_trap_id}}",
+									"description": "Camera trap UUID"
+								}
+							]
+						},
+						"description": "**Access:** Company ADMIN and SUPER_ADMIN only\n\n**Purpose:** Assign a camera trap to a client company\n\n**Request Body:**\n- `clientCompanyId` (required): UUID of the client company\n\n**Business Rules:**\n- Camera trap must not already be assigned\n- Client company must exist and be ACTIVE\n- Updates client company's product count\n\n**Response:**\n```json\n{\n  \"message\": \"Camera trap assigned successfully\",\n  \"cameraTrap\": {\n    \"id\": \"uuid\",\n    \"assignedToId\": \"client-company-uuid\",\n    \"assignedAt\": \"2025-10-26T...\",\n    \"assignedById\": \"company-user-uuid\",\n    \"assignedTo\": {\n      \"id\": \"uuid\",\n      \"companyName\": \"Client Company\",\n      \"email\": \"client@company.com\",\n      \"credits\": 100\n    }\n  }\n}\n```\n\n**Status Codes:**\n- `200 OK`: Successfully assigned\n- `400 Bad Request`: Already assigned or company inactive\n- `404 Not Found`: Camera trap or company not found\n- `403 Forbidden`: Insufficient permissions"
+					},
+					"response": []
+				},
+				{
+					"name": "7. Unassign Camera Trap",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{company_token}}",
+								"description": "JWT token from company user (ADMIN or SUPER_ADMIN)"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/camera-traps/:trapId/unassign",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"camera-traps",
+								":trapId",
+								"unassign"
+							],
+							"variable": [
+								{
+									"key": "trapId",
+									"value": "{{camera_trap_id}}",
+									"description": "Camera trap UUID"
+								}
+							]
+						},
+						"description": "**Access:** Company ADMIN and SUPER_ADMIN only\n\n**Purpose:** Unassign a camera trap from a client company\n\n**Business Rules:**\n- Camera trap must currently be assigned\n- Updates client company's product count (decrements)\n\n**Response:**\n```json\n{\n  \"message\": \"Camera trap unassigned successfully\",\n  \"cameraTrap\": {\n    \"id\": \"uuid\",\n    \"assignedToId\": null,\n    \"assignedAt\": null,\n    \"assignedById\": null,\n    \"productId\": \"CT-PRD-12345\"\n  },\n  \"previouslyAssignedTo\": {\n    \"id\": \"uuid\",\n    \"companyName\": \"Client Company\",\n    \"credits\": 99\n  }\n}\n```\n\n**Status Codes:**\n- `200 OK`: Successfully unassigned\n- `400 Bad Request`: Camera trap not assigned\n- `404 Not Found`: Camera trap not found\n- `403 Forbidden`: Insufficient permissions"
+					},
+					"response": []
+				},
+				{
+					"name": "8. Delete Camera Trap",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{company_token}}",
+								"description": "JWT token from company user (ADMIN or SUPER_ADMIN)"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/camera-traps/:trapId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"camera-traps",
+								":trapId"
+							],
+							"variable": [
+								{
+									"key": "trapId",
+									"value": "{{camera_trap_id}}",
+									"description": "Camera trap UUID"
+								}
+							]
+						},
+						"description": "**Access:** Company ADMIN and SUPER_ADMIN only\n\n**Purpose:** Permanently delete a camera trap\n\n**Business Rules:**\n- If assigned, automatically unassigns and updates client company product count\n\n**Response:**\n```json\n{\n  \"message\": \"Camera trap deleted successfully\",\n  \"deletedTrap\": {\n    \"id\": \"uuid\",\n    \"productId\": \"CT-PRD-12345\",\n    \"batchId\": \"BATCH-2025-001\"\n  }\n}\n```\n\n**Status Codes:**\n- `200 OK`: Successfully deleted\n- `404 Not Found`: Camera trap not found\n- `403 Forbidden`: Insufficient permissions"
+					},
+					"response": []
+				}
+			],
+			"description": "Complete CRUD operations for Camera Trap management with role-based access control."
+		},
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Login - Company User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const jsonData = pm.response.json();",
+									"    pm.environment.set(\"company_token\", jsonData.token);",
+									"    pm.environment.set(\"token\", jsonData.token);",
+									"    console.log(\"Company token saved:\", jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"your-company-username\",\n  \"password\": \"your-password\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/company-users/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"company-users",
+								"login"
+							]
+						},
+						"description": "Login as a company user (internal admin)"
+					},
+					"response": []
+				},
+				{
+					"name": "Login - Client User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const jsonData = pm.response.json();",
+									"    pm.environment.set(\"client_token\", jsonData.token);",
+									"    pm.environment.set(\"token\", jsonData.token);",
+									"    console.log(\"Client token saved:\", jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"kanoongorupali@gmail.com\",\n  \"password\": \"djakshat\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/client-users/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"client-users",
+								"login"
+							]
+						},
+						"description": "Login as a client user"
+					},
+					"response": []
+				}
+			],
+			"description": "Authentication endpoints to get JWT tokens for testing"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "camera_trap_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "company_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "client_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
