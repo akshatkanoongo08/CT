@@ -94,6 +94,31 @@ class ApiService {
     delete mappedData.phone;
     return this.api.put(`/onboard/client-company/${companyId}`, mappedData);
   }
+
+  // Species of Interest APIs
+  async getSupportedSpecies() {
+    return this.api.get('/species-of-interest/supported');
+  }
+
+  async getSpeciesOfInterest() {
+    return this.api.get('/species-of-interest');
+  }
+
+  async addSpeciesOfInterest(data) {
+    return this.api.post('/species-of-interest', data);
+  }
+
+  async updateSpeciesOfInterest(id, data) {
+    return this.api.put(`/species-of-interest/${id}`, data);
+  }
+
+  async deleteSpeciesOfInterest(id) {
+    return this.api.delete(`/species-of-interest/${id}`);
+  }
+
+  async toggleSpeciesOfInterest(id) {
+    return this.api.patch(`/species-of-interest/${id}/toggle`);
+  }
 }
 
 export default new ApiService();

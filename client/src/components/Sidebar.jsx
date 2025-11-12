@@ -10,6 +10,7 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
+  Dna,
 } from 'lucide-react';
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
@@ -18,6 +19,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
   const navItems = [
     { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', show: true },
     { path: '/camera-traps', icon: Camera, label: 'Camera Traps', show: true },
+    { path: '/species', icon: Dna, label: 'Species of Interest', show: true },
     { path: '/users', icon: Users, label: 'Users', show: isAdmin() },
     { path: '/company', icon: Building2, label: 'Company Info', show: isAdmin() },
     { path: '/profile', icon: User, label: 'Profile', show: true },

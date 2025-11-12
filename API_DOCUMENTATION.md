@@ -584,6 +584,265 @@ Authorization: Bearer <client_user_token>
 
 ---
 
+## 7. Species of Interest Management
+
+### 7.1 Add Species to Master List (Company Admin Only)
+
+**Endpoint:** `POST /api/species-of-interest/supported`
+
+**Authentication:** COMPANY_USER JWT token required
+
+**Description:** Allows company administrators to add new species to the master supported species list. Once added, these species become available for all client companies to select.
+
+**Request:**
+```http
+POST /api/species-of-interest/supported
+Authorization: Bearer <company_user_token>
+Content-Type: application/json
+
+{
+  "specieId": "tiger",
+  "specieName": "Tiger"
+}
+```
+
+**Response (201 Created):**
+```json
+{
+  "message": "Species added to master list successfully",
+  "species": {
+    "id": 5,
+    "specieId": "tiger",
+    "specieName": "Tiger",
+    "active": true,
+    "createdAt": "2025-11-12T10:30:00.000Z"
+  }
+}
+```
+
+**Error Responses:**
+
+*Missing Required Fields (400):*
+```json
+{
+  "message": "specieId and specieName are required"
+}
+```
+
+*Duplicate Species (400):*
+```json
+{
+  "message": "Species with specieId 'tiger' already exists in the master list"
+}
+```
+
+*Unauthorized - Not a Company User (403):*
+```json
+{
+  "message": "Access denied: user must be a COMPANY_USER"
+}
+```
+
+**Field Requirements:**
+- `specieId` (required): Unique identifier, lowercase, no spaces (e.g., "wild_boar")
+- `specieName` (required): Display name, proper case (e.g., "Wild Boar")
+
+**Access Control:**
+- ✅ COMPANY_USER (all roles)
+- ❌ CLIENT_USER (all roles)
+
+### 7.2 Get Master Species List
+
+**Endpoint:** `GET /api/species-of-interest/supported`
+
+**Authentication:** CLIENT_USER or COMPANY_USER JWT token required
+
+**Description:** Retrieves all active species from the master list.
+
+**Request:**
+```http
+GET /api/species-of-interest/supported
+Authorization: Bearer <token>
+```
+
+**Response (200 OK):**
+```json
+{
+  "message": "Supported species retrieved successfully",
+  "species": [
+    {
+      "id": 1,
+      "specieId": "cow",
+      "specieName": "Cow",
+      "active": true,
+      "createdAt": "2025-11-12T09:00:00.000Z"
+    },
+    {
+      "id": 2,
+      "specieId": "dog",
+      "specieName": "Dog",
+      "active": true,
+      "createdAt": "2025-11-12T09:00:00.000Z"
+    }
+  ]
+}
+```
+
+### 7.3 Add Species of Interest (Client Admin Only)
+
+**Endpoint:** `POST /api/species-of-interest`
+
+**Authentication:** CLIENT_USER JWT token (ADMIN or SUPER_ADMIN role)
+
+**Description:** Allows client admins to select a species from the master list and add it to their company's Species of Interest with a severity level.
+
+**Request:**
+```http
+POST /api/species-of-interest
+Authorization: Bearer <client_user_token>
+Content-Type: application/json
+
+{
+  "specieId": 1,
+  "severityLevel": "HIGH"
+}
+```
+
+**Severity Levels:**
+- `LOW` - Minimal threat, monitoring recommended
+- `MEDIUM` - Moderate concern, requires attention
+- `HIGH` - Significant threat, immediate action needed
+
+**Response (201 Created):**
+```json
+{
+  "message": "Species of interest added successfully",
+  "speciesOfInterest": {
+    "id": 1,
+    "clientId": "abc-123",
+    "specieId": 1,
+    "specieName": "Tiger",
+    "severityLevel": "HIGH",
+    "active": true,
+    "createdAt": "2025-11-12T11:00:00.000Z"
+  }
+}
+```
+
+### 7.4 Get Client's Species of Interest
+
+**Endpoint:** `GET /api/species-of-interest`
+
+**Authentication:** CLIENT_USER JWT token required
+
+**Description:** Retrieves all species of interest for the authenticated client user's company.
+
+**Request:**
+```http
+GET /api/species-of-interest
+Authorization: Bearer <client_user_token>
+```
+
+**Response (200 OK):**
+```json
+{
+  "message": "Species of interest retrieved successfully",
+  "speciesOfInterest": [
+    {
+      "id": 1,
+      "clientId": "abc-123",
+      "specieId": 1,
+      "specieName": "Tiger",
+      "severityLevel": "HIGH",
+      "active": true,
+      "createdAt": "2025-11-12T11:00:00.000Z",
+      "supportedSpecies": {
+        "specieId": "tiger",
+        "specieName": "Tiger"
+      }
+    }
+  ]
+}
+```
+
+### 7.5 Update Species Severity Level
+
+**Endpoint:** `PUT /api/species-of-interest/:id`
+
+**Authentication:** CLIENT_USER JWT token (ADMIN or SUPER_ADMIN role)
+
+**Request:**
+```http
+PUT /api/species-of-interest/1
+Authorization: Bearer <client_user_token>
+Content-Type: application/json
+
+{
+  "severityLevel": "MEDIUM"
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "message": "Species of interest updated successfully",
+  "speciesOfInterest": {
+    "id": 1,
+    "severityLevel": "MEDIUM",
+    ...
+  }
+}
+```
+
+### 7.6 Delete Species of Interest
+
+**Endpoint:** `DELETE /api/species-of-interest/:id`
+
+**Authentication:** CLIENT_USER JWT token (ADMIN or SUPER_ADMIN role)
+
+**Description:** Soft deletes a species of interest (sets active=false).
+
+**Request:**
+```http
+DELETE /api/species-of-interest/1
+Authorization: Bearer <client_user_token>
+```
+
+**Response (200 OK):**
+```json
+{
+  "message": "Species of interest deleted successfully"
+}
+```
+
+### 7.7 Toggle Species Active Status
+
+**Endpoint:** `PATCH /api/species-of-interest/:id/toggle`
+
+**Authentication:** CLIENT_USER JWT token (ADMIN or SUPER_ADMIN role)
+
+**Description:** Toggles the active status of a species of interest.
+
+**Request:**
+```http
+PATCH /api/species-of-interest/1/toggle
+Authorization: Bearer <client_user_token>
+```
+
+**Response (200 OK):**
+```json
+{
+  "message": "Species of interest activated successfully",
+  "speciesOfInterest": {
+    "id": 1,
+    "active": true,
+    ...
+  }
+}
+```
+
+---
+
 ## Notes
 
 1. **Email Configuration**: Ensure `GMAIL_USER` and `GMAIL_PASS` are set in `.env` for email functionality
@@ -592,3 +851,8 @@ Authorization: Bearer <client_user_token>
 4. **Client Type**: Options are `STANDARD`, `PREMIUM`, `ENTERPRISE`
 5. **Status**: Options are `ACTIVE`, `INACTIVE`
 6. **Subscription**: If `validTill` is set and expired, client users cannot login
+7. **Species Management**: 
+   - Company users manage the master species list
+   - Client users select from the master list for their company
+   - Severity levels help prioritize species monitoring
+   - See `ADD_SPECIES_API_GUIDE.md` for detailed species management guide

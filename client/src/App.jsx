@@ -11,6 +11,7 @@ import CameraTrapDetail from './pages/CameraTrapDetail';
 import Users from './pages/Users';
 import CompanyInfo from './pages/CompanyInfo';
 import Profile from './pages/Profile';
+import SpeciesOfInterest from './pages/SpeciesOfInterest';
 
 function App() {
   return (
@@ -43,6 +44,7 @@ function App() {
             <Route path="camera-traps/:trapId" element={<CameraTrapDetail />} />
             <Route path="users" element={<Users />} />
             <Route path="company" element={<CompanyInfo />} />
+            <Route path="species" element={<SpeciesOfInterest />} />
             <Route path="profile" element={<Profile />} />
           </Route>
 

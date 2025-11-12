@@ -42,9 +42,10 @@ model ClientCompany {
   broadcastEnabled    Boolean      @default(false)
   alarmEnabled        Boolean      @default(false)
   products            CameraTrap[]
-  createdBy           CompanyUser? @relation("CreatedClients", fields: [createdById], references: [id])
-  modifiedBy          CompanyUser? @relation("ModifiedClients", fields: [modifiedById], references: [id])
+  createdBy           CompanyUser?        @relation("CreatedClients", fields: [createdById], references: [id])
+  modifiedBy          CompanyUser?        @relation("ModifiedClients", fields: [modifiedById], references: [id])
   clientUsers         ClientUser[]
+  speciesOfInterest   SpeciesOfInterest[]
 }
 
 model ClientUser {
@@ -101,4 +102,33 @@ enum ClientType {
 enum UserType {
   COMPANY_USER
   CLIENT_USER
+}
+
+enum SeverityLevel {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+model SupportedSpecies {
+  id                 Int                  @id @default(autoincrement())
+  specieId           String               @unique
+  specieName         String
+  active             Boolean              @default(true)
+  createdAt          DateTime             @default(now())
+  speciesOfInterest  SpeciesOfInterest[]
+}
+
+model SpeciesOfInterest {
+  id                 Int               @id @default(autoincrement())
+  clientId           String
+  specieId           String
+  specieName         String
+  severityLevel      SeverityLevel
+  active             Boolean           @default(true)
+  createdAt          DateTime          @default(now())
+  client             ClientCompany     @relation(fields: [clientId], references: [id])
+  supportedSpecies   SupportedSpecies  @relation(fields: [specieId], references: [specieId])
+  
+  @@unique([clientId, specieId])
 }

@@ -3,13 +3,13 @@ import companyUserRoutes from './routes/companyUser.routes.js';
 import onboardRoutes from './routes/onboard.routes.js';
 import clientUserRoutes from './routes/clientUser.routes.js';
 import cameraTrapRoutes from './routes/ct.routes.js';
+import speciesOfInterestRoutes from './routes/speciesOfInterest.routes.js';
 import dotenv from 'dotenv';
 import cors from 'cors';
 
 dotenv.config();
 const app = express();
 console.log('Setting up Express server...');
-
 app.use(cors());
 app.use(express.json());
 
@@ -37,6 +37,9 @@ app.use('/api/client-users', clientUserRoutes);
 
 console.log('Mounting camera trap routes at /api/camera-traps');
 app.use('/api/camera-traps', cameraTrapRoutes);
+
+console.log('Mounting species of interest routes at /api/species-of-interest');
+app.use('/api/species-of-interest', speciesOfInterestRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
