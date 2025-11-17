@@ -119,6 +119,11 @@ class ApiService {
   async toggleSpeciesOfInterest(id) {
     return this.api.patch(`/species-of-interest/${id}/toggle`);
   }
+
+  // Incident APIs (for client users)
+  async getLatestIncidents() {
+    return this.api.get('/client/incidents/latest');
+  }
 }
 
 export default new ApiService();

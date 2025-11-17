@@ -4,6 +4,8 @@ import onboardRoutes from './routes/onboard.routes.js';
 import clientUserRoutes from './routes/clientUser.routes.js';
 import cameraTrapRoutes from './routes/ct.routes.js';
 import speciesOfInterestRoutes from './routes/speciesOfInterest.routes.js';
+import trapsRoutes from './routes/traps.routes.js';
+import detectionRoutes from './routes/detection.routes.js';
 import dotenv from 'dotenv';
 import cors from 'cors';
 
@@ -41,6 +43,12 @@ app.use('/api/camera-traps', cameraTrapRoutes);
 console.log('Mounting species of interest routes at /api/species-of-interest');
 app.use('/api/species-of-interest', speciesOfInterestRoutes);
 
+console.log('Mounting traps lookup routes at /api/traps');
+app.use('/api/traps', trapsRoutes);
+
+console.log('Mounting detection routes at /api');
+app.use('/api', detectionRoutes);
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
@@ -53,4 +61,7 @@ app.listen(PORT, () => {
   console.log('- DELETE /api/camera-traps/:trapId (delete)');
   console.log('- POST /api/camera-traps/:trapId/assign');
   console.log('- POST /api/camera-traps/:trapId/unassign');
+  console.log('- POST /api/traps/lookup (lookup trap -> returns client info)');
+  console.log('- POST /api/detection (store an incident with species)');
+  console.log('- GET /api/client/incidents/latest (client-user only)');
 });

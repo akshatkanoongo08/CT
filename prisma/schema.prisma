@@ -132,3 +132,45 @@ model SpeciesOfInterest {
   
   @@unique([clientId, specieId])
 }
+
+// Incident models for storing camera trap detections
+model Incident {
+  id                     String            @id @default(uuid())
+  trapId                 String
+  clientId               String
+  captureTime            DateTime
+  processingTime         DateTime
+  processingDelaySeconds Int?
+  imageUrl               String
+  publicId               String
+  thumbnailUrl           String
+  totalDetections        Int               @default(0)
+  gps                    String?
+  temperature            String?
+  warnings               Json?
+  createdAt              DateTime          @default(now())
+
+  species                IncidentSpecies[]
+}
+
+enum AlertPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+model IncidentSpecies {
+  id                String   @id @default(uuid())
+  incidentId        String
+  species           String
+  confidence        Float?
+  detectorConfidence Float?
+  bbox              Json?
+  label             String?
+  maskUrl           String?
+  topk              Json?
+  priority          AlertPriority @default(LOW)
+  createdAt         DateTime @default(now())
+
+  incident          Incident @relation(fields: [incidentId], references: [id])
+}
