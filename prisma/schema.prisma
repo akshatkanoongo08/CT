@@ -78,6 +78,7 @@ model CameraTrap {
   sim          String?
   simNumber    String?
   location     String?
+  status       UserStatus     @default(ACTIVE)
   assignedBy   CompanyUser?   @relation(fields: [assignedById], references: [id])
   assignedTo   ClientCompany? @relation(fields: [assignedToId], references: [id])
 }

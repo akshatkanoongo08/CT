@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import {
   Camera,
   Search,
@@ -11,16 +12,20 @@ import {
   AlertCircle,
   Wifi,
   WifiOff,
+  Power,
+  PowerOff,
 } from 'lucide-react';
 import { format } from 'date-fns';
 
 const CameraTraps = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [cameraTraps, setCameraTraps] = useState([]);
   const [filteredTraps, setFilteredTraps] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [togglingId, setTogglingId] = useState(null);
 
   useEffect(() => {
     fetchCameraTraps();
@@ -71,6 +76,34 @@ const CameraTraps = () => {
   };
 
   const isActive = (trap) => trap.validTill && new Date(trap.validTill) > new Date();
+
+  const handleToggleStatus = async (e, trapId) => {
+    e.stopPropagation(); // Prevent navigation to detail page
+    
+    if (togglingId) return; // Prevent multiple clicks
+    
+    try {
+      setTogglingId(trapId);
+      const response = await api.toggleCameraTrapStatus(trapId);
+      
+      // Update the camera trap in state
+      setCameraTraps(prevTraps =>
+        prevTraps.map(trap =>
+          trap.id === trapId
+            ? { ...trap, status: response.cameraTrap.status }
+            : trap
+        )
+      );
+      
+      // Show success message
+      alert(response.message || 'Camera trap status updated successfully');
+    } catch (error) {
+      console.error('Error toggling camera trap status:', error);
+      alert(error.response?.data?.message || 'Failed to update camera trap status');
+    } finally {
+      setTogglingId(null);
+    }
+  };
 
   if (loading) {
     return (
@@ -192,17 +225,53 @@ const CameraTraps = () => {
                 )}
               </div>
 
-              {/* Status Badge */}
-              <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                <span
-                  className={`badge ${isActive(trap) ? 'badge-success' : 'badge-danger'}`}
-                >
-                  {isActive(trap) ? 'Active' : 'Inactive'}
-                </span>
-                <button className="text-primary-600 hover:text-primary-700 flex items-center gap-1 text-sm font-medium">
-                  <Eye className="w-4 h-4" />
-                  View Details
-                </button>
+              {/* Status Badge and Actions */}
+              <div className="pt-4 border-t border-gray-100">
+                <div className="flex items-center justify-between mb-3">
+                  <span
+                    className={`badge ${trap.status === 'ACTIVE' ? 'badge-success' : 'badge-danger'}`}
+                  >
+                    {trap.status === 'ACTIVE' ? 'Active' : 'Inactive'}
+                  </span>
+                  <button className="text-primary-600 hover:text-primary-700 flex items-center gap-1 text-sm font-medium">
+                    <Eye className="w-4 h-4" />
+                    View Details
+                  </button>
+                </div>
+                
+                {/* Toggle Button - Only for ADMIN/SUPER_ADMIN */}
+                {(user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN') && (
+                  <button
+                    onClick={(e) => handleToggleStatus(e, trap.id)}
+                    disabled={togglingId === trap.id}
+                    className={`w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                      trap.status === 'ACTIVE'
+                        ? 'bg-red-50 text-red-700 hover:bg-red-100 border border-red-200'
+                        : 'bg-green-50 text-green-700 hover:bg-green-100 border border-green-200'
+                    } ${togglingId === trap.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    {togglingId === trap.id ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent"></div>
+                        <span>Updating...</span>
+                      </>
+                    ) : (
+                      <>
+                        {trap.status === 'ACTIVE' ? (
+                          <>
+                            <PowerOff className="w-4 h-4" />
+                            <span>Mark as Inactive</span>
+                          </>
+                        ) : (
+                          <>
+                            <Power className="w-4 h-4" />
+                            <span>Mark as Active</span>
+                          </>
+                        )}
+                      </>
+                    )}
+                  </button>
+                )}
               </div>
             </div>
           ))}

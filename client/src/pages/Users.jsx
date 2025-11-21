@@ -10,6 +10,8 @@ import {
   Save,
   AlertCircle,
   CheckCircle2,
+  Power,
+  PowerOff,
 } from 'lucide-react';
 
 const Users = () => {
@@ -20,6 +22,7 @@ const Users = () => {
   const [editingUser, setEditingUser] = useState(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [togglingId, setTogglingId] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -104,6 +107,26 @@ const Users = () => {
       setTimeout(() => setSuccess(''), 3000);
     } catch (error) {
       setError(error.message || 'Failed to delete user');
+    }
+  };
+
+  const handleToggleStatus = async (userId) => {
+    if (togglingId) return; // Prevent multiple clicks
+    
+    setError('');
+    setSuccess('');
+    setTogglingId(userId);
+
+    try {
+      const response = await api.toggleClientUserStatus(userId);
+      setSuccess(response.message || 'User status updated successfully!');
+      fetchUsers();
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (error) {
+      setError(error.response?.data?.message || error.message || 'Failed to update user status');
+      setTimeout(() => setError(''), 5000);
+    } finally {
+      setTogglingId(null);
     }
   };
 
@@ -226,13 +249,33 @@ const Users = () => {
                       <Edit2 className="w-4 h-4" />
                     </button>
                     {user.id !== currentUser.id && (
-                      <button
-                        onClick={() => handleDeleteUser(user.id)}
-                        className="text-red-600 hover:text-red-700 p-1"
-                        title="Delete"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      <>
+                        <button
+                          onClick={() => handleToggleStatus(user.id)}
+                          disabled={togglingId === user.id}
+                          className={`p-1 ${
+                            user.status === 'ACTIVE'
+                              ? 'text-orange-600 hover:text-orange-700'
+                              : 'text-green-600 hover:text-green-700'
+                          } ${togglingId === user.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                          title={user.status === 'ACTIVE' ? 'Deactivate User' : 'Activate User'}
+                        >
+                          {togglingId === user.id ? (
+                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent"></div>
+                          ) : user.status === 'ACTIVE' ? (
+                            <PowerOff className="w-4 h-4" />
+                          ) : (
+                            <Power className="w-4 h-4" />
+                          )}
+                        </button>
+                        <button
+                          onClick={() => handleDeleteUser(user.id)}
+                          className="text-red-600 hover:text-red-700 p-1"
+                          title="Delete"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </>
                     )}
                   </td>
                 </tr>

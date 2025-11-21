@@ -6,6 +6,7 @@ import {
   updateClientUser,
   deleteClientUser,
   changeClientUserPassword,
+  toggleClientUserStatus,
 } from '../controllers/clientUser.controller.js';
 import { validateClientCompany } from '../middlewares/clientCompany.middleware.js';
 
@@ -59,5 +60,12 @@ router.delete('/:userId', validateClientCompany, deleteClientUser);
  * Accessible by: Any authenticated client user
  */
 router.post('/change-password', validateClientCompany, changeClientUserPassword);
+
+/**
+ * PATCH /api/client-users/:userId/toggle
+ * Toggle user status (ACTIVE/INACTIVE)
+ * Accessible by: CLIENT_USER with SUPER_ADMIN or ADMIN role
+ */
+router.patch('/:userId/toggle', validateClientCompany, toggleClientUserStatus);
 
 export default router;
