@@ -14,6 +14,8 @@ import {
   Smartphone,
   AlertCircle,
   CheckCircle2,
+  Power,
+  PowerOff,
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -25,6 +27,7 @@ const CameraTrapDetail = () => {
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [toggling, setToggling] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [formData, setFormData] = useState({});
@@ -101,6 +104,27 @@ const CameraTrapDetail = () => {
         ? format(new Date(cameraTrap.validTill), 'yyyy-MM-dd')
         : '',
     });
+  };
+
+  const handleToggleStatus = async () => {
+    if (toggling) return;
+    
+    setError('');
+    setSuccess('');
+    setToggling(true);
+
+    try {
+      const response = await api.toggleCameraTrapStatus(trapId);
+      setSuccess(response.message || 'Camera trap status updated successfully!');
+      if (response.cameraTrap) {
+        setCameraTrap(response.cameraTrap);
+      }
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (error) {
+      setError(error.response?.data?.message || 'Failed to update camera trap status');
+    } finally {
+      setToggling(false);
+    }
   };
 
   const isActive = cameraTrap?.validTill && new Date(cameraTrap.validTill) > new Date();
@@ -181,20 +205,55 @@ const CameraTrapDetail = () => {
 
       {/* Status Card */}
       <div className="card">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-4">
-            <div className={`p-4 rounded-lg ${isActive ? 'bg-green-100' : 'bg-gray-100'}`}>
-              <Camera className={`w-8 h-8 ${isActive ? 'text-green-600' : 'text-gray-400'}`} />
+            <div className={`p-4 rounded-lg ${cameraTrap.status === 'ACTIVE' ? 'bg-green-100' : 'bg-gray-100'}`}>
+              <Camera className={`w-8 h-8 ${cameraTrap.status === 'ACTIVE' ? 'text-green-600' : 'text-gray-400'}`} />
             </div>
             <div>
               <h2 className="text-xl font-semibold text-gray-900">{cameraTrap.productId}</h2>
               <p className="text-gray-600">{cameraTrap.productType || 'Camera Trap'}</p>
             </div>
           </div>
-          <span className={`badge text-lg ${isActive ? 'badge-success' : 'badge-danger'}`}>
-            {isActive ? 'Active' : 'Inactive'}
+          <span className={`badge text-lg ${cameraTrap.status === 'ACTIVE' ? 'badge-success' : 'badge-danger'}`}>
+            {cameraTrap.status === 'ACTIVE' ? 'Active' : 'Inactive'}
           </span>
         </div>
+        
+        {/* Toggle Button - Only for ADMIN/SUPER_ADMIN */}
+        {(user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN') && (
+          <button
+            type="button"
+            onClick={handleToggleStatus}
+            disabled={toggling}
+            className={`w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg text-sm font-medium transition-colors ${
+              cameraTrap.status === 'ACTIVE'
+                ? 'bg-red-50 text-red-700 hover:bg-red-100 border-2 border-red-200'
+                : 'bg-green-50 text-green-700 hover:bg-green-100 border-2 border-green-200'
+            } ${toggling ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            {toggling ? (
+              <>
+                <div className="animate-spin rounded-full h-5 w-5 border-2 border-current border-t-transparent"></div>
+                <span>Updating Status...</span>
+              </>
+            ) : (
+              <>
+                {cameraTrap.status === 'ACTIVE' ? (
+                  <>
+                    <PowerOff className="w-5 h-5" />
+                    <span>Mark Camera Trap as Inactive</span>
+                  </>
+                ) : (
+                  <>
+                    <Power className="w-5 h-5" />
+                    <span>Mark Camera Trap as Active</span>
+                  </>
+                )}
+              </>
+            )}
+          </button>
+        )}
       </div>
 
       {/* Details Form */}

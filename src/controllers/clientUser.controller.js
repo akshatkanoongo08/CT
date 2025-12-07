@@ -366,3 +366,82 @@ export const changeClientUserPassword = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+/**
+ * Toggle Client User Status (ACTIVE/INACTIVE)
+ * Accessible by CLIENT_USER (ADMIN or SUPER_ADMIN)
+ */
+export const toggleClientUserStatus = async (req, res) => {
+  console.log('toggleClientUserStatus called for:', req.params.userId);
+
+  const { userId } = req.params;
+
+  // Only ADMIN or SUPER_ADMIN can toggle user status
+  if (req.user.role !== 'ADMIN' && req.user.role !== 'SUPER_ADMIN') {
+    return res.status(403).json({ message: 'Access denied: Only Admin or Super Admin can toggle user status' });
+  }
+
+  try {
+    // Find the user
+    const user = await prisma.clientUser.findUnique({
+      where: { id: userId },
+      include: {
+        client: {
+          select: {
+            id: true,
+            companyName: true,
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Check if user belongs to the same company
+    if (user.clientId !== req.company.id) {
+      return res.status(403).json({ 
+        message: 'Access denied: You can only toggle status for users in your company' 
+      });
+    }
+
+    // Prevent user from deactivating themselves
+    if (user.id === req.user.id) {
+      return res.status(403).json({ 
+        message: 'You cannot deactivate your own account' 
+      });
+    }
+
+    // Toggle the status
+    const newStatus = user.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+    
+    const updatedUser = await prisma.clientUser.update({
+      where: { id: userId },
+      data: { status: newStatus },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        mobile: true,
+        status: true,
+        role: true,
+        createdAt: true,
+        client: {
+          select: {
+            id: true,
+            companyName: true,
+          },
+        },
+      },
+    });
+
+    res.status(200).json({
+      message: `User marked as ${newStatus.toLowerCase()} successfully`,
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.error('Error toggling client user status:', error);
+    res.status(500).json({ message: error.message });
+  }
+};

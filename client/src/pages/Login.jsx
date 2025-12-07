@@ -81,8 +81,17 @@ const Login = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Error Message */}
             {error && (
-              <div className="bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-lg animate-shake">
+              <div className={`border-l-4 px-4 py-3 rounded-lg animate-shake ${
+                error.includes('inactive') || error.includes('Inactive')
+                  ? 'bg-orange-50 border-orange-500 text-orange-700'
+                  : 'bg-red-50 border-red-500 text-red-700'
+              }`}>
                 <p className="text-sm font-medium">{error}</p>
+                {(error.includes('inactive') || error.includes('Inactive')) && (
+                  <p className="text-xs mt-1">
+                    Your account has been deactivated. Please contact your company administrator for assistance.
+                  </p>
+                )}
               </div>
             )}
 

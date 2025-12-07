@@ -63,6 +63,10 @@ class ApiService {
     return this.api.put(`/camera-traps/${trapId}`, data);
   }
 
+  async toggleCameraTrapStatus(trapId) {
+    return this.api.patch(`/camera-traps/${trapId}/toggle`);
+  }
+
   // Client User APIs
   async getClientUsers() {
     return this.api.get('/client-users');
@@ -78,6 +82,10 @@ class ApiService {
 
   async deleteClientUser(userId) {
     return this.api.delete(`/client-users/${userId}`);
+  }
+
+  async toggleClientUserStatus(userId) {
+    return this.api.patch(`/client-users/${userId}/toggle`);
   }
 
   // Company APIs

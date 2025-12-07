@@ -572,3 +572,73 @@ export const unassignCameraTrap = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+/**
+ * Toggle CameraTrap Status (ACTIVE/INACTIVE)
+ * Accessible by CLIENT_USER (ADMIN or SUPER_ADMIN)
+ */
+export const toggleCameraTrapStatus = async (req, res) => {
+  console.log('toggleCameraTrapStatus called for:', req.params.id);
+
+  const { id } = req.params;
+
+  try {
+    // Find the camera trap
+    const cameraTrap = await prisma.cameraTrap.findUnique({
+      where: { id },
+      include: {
+        assignedTo: {
+          select: {
+            id: true,
+            companyName: true,
+          },
+        },
+      },
+    });
+
+    if (!cameraTrap) {
+      return res.status(404).json({ message: 'Camera trap not found' });
+    }
+
+    // CLIENT_USER: Check if camera trap belongs to their company
+    if (req.user.userType === 'CLIENT_USER') {
+      if (!req.company || !cameraTrap.assignedToId || cameraTrap.assignedToId !== req.company.id) {
+        return res.status(403).json({ 
+          message: 'You can only toggle status for camera traps assigned to your company' 
+        });
+      }
+    }
+
+    // Toggle the status
+    const newStatus = cameraTrap.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+    
+    const updatedTrap = await prisma.cameraTrap.update({
+      where: { id },
+      data: { status: newStatus },
+      include: {
+        assignedTo: {
+          select: {
+            id: true,
+            companyName: true,
+            email: true,
+          },
+        },
+        assignedBy: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    res.status(200).json({
+      message: `Camera trap marked as ${newStatus.toLowerCase()} successfully`,
+      cameraTrap: updatedTrap,
+    });
+  } catch (error) {
+    console.error('Error toggling camera trap status:', error);
+    res.status(500).json({ message: error.message });
+  }
+};

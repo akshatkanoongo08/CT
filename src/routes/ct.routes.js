@@ -7,6 +7,7 @@ import {
   deleteCameraTrap,
   assignCameraTrap,
   unassignCameraTrap,
+  toggleCameraTrapStatus,
 } from '../controllers/ct.controller.js';
 import { authMiddleware } from '../middlewares/auth.middleware.js';
 import { unifiedAuthMiddleware } from '../middlewares/clientCompany.middleware.js';
@@ -99,6 +100,18 @@ router.put(
   '/:trapId',
   unifiedAuthMiddleware,
   editCameraTrap
+);
+
+/**
+ * PATCH /api/camera-traps/:id/toggle
+ * Toggle CameraTrap status (ACTIVE/INACTIVE)
+ * Company users: can toggle any CameraTrap
+ * Client users: can only toggle if assigned to their company and have ADMIN/SUPER_ADMIN role
+ */
+router.patch(
+  '/:id/toggle',
+  unifiedAuthMiddleware,
+  toggleCameraTrapStatus
 );
 
 export default router;
