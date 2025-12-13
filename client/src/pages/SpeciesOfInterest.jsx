@@ -11,7 +11,9 @@ import {
   Edit2,
   Trash2,
   Eye,
-  EyeOff
+  EyeOff,
+  Power,
+  PowerOff
 } from 'lucide-react';
 
 const SpeciesOfInterest = () => {
@@ -26,6 +28,7 @@ const SpeciesOfInterest = () => {
     severityLevel: 'MEDIUM',
   });
   const [submitting, setSubmitting] = useState(false);
+  const [togglingId, setTogglingId] = useState(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -84,6 +87,26 @@ const SpeciesOfInterest = () => {
       setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to remove species');
+    }
+  };
+
+  const handleToggleStatus = async (id, specieName, currentStatus) => {
+    if (togglingId) return; // Prevent multiple clicks
+    
+    setError('');
+    setSuccess('');
+    setTogglingId(id);
+
+    try {
+      const response = await api.toggleSpeciesOfInterest(id);
+      setSuccess(response.message || 'Species status updated successfully!');
+      fetchData();
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to update species status');
+      setTimeout(() => setError(''), 5000);
+    } finally {
+      setTogglingId(null);
     }
   };
 
@@ -257,10 +280,28 @@ const SpeciesOfInterest = () => {
                       {new Date(species.createdAt).toLocaleDateString()}
                     </td>
                     {canManage && (
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                        <button
+                          onClick={() => handleToggleStatus(species.id, species.specieName, species.active)}
+                          disabled={togglingId === species.id}
+                          className={`p-1 transition-colors ${
+                            species.active
+                              ? 'text-orange-600 hover:text-orange-700'
+                              : 'text-green-600 hover:text-green-700'
+                          } ${togglingId === species.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                          title={species.active ? 'Mark as Inactive' : 'Mark as Active'}
+                        >
+                          {togglingId === species.id ? (
+                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent"></div>
+                          ) : species.active ? (
+                            <PowerOff className="w-4 h-4" />
+                          ) : (
+                            <Power className="w-4 h-4" />
+                          )}
+                        </button>
                         <button
                           onClick={() => handleDeleteSpecies(species.id, species.specieName)}
-                          className="text-red-600 hover:text-red-900 transition-colors"
+                          className="text-red-600 hover:text-red-900 transition-colors p-1"
                           title="Remove species"
                         >
                           <Trash2 className="w-4 h-4" />
